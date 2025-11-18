@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>H2O Snooker - 赛事</title>
+	<style>
+		body {
+			margin: 0;
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+			background-color: #0A0F1A;
+			color: #ffffff;
+		}
+
+		header {
+			background-color: #0A0F1A;
+			padding: 20px 40px;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			border-bottom: 1px solid #1E2233;
+		}
+
+		header h1 {
+			margin: 0;
+			font-size: 28px;
+			color: #7AB8FF;
+		}
+
+		header img {
+			height: 50px;
+			width: auto;
+			margin-right: 15px;
+		}
+
+		nav a {
+			margin-left: 20px;
+			color: #7AB8FF;
+			font-weight: bold;
+			text-decoration: none;
+		}
+
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 40px 20px;
+		}
+
+		h2 {
+			color: #7AB8FF;
+			margin-bottom: 20px;
+		}
+
+		.card {
+			background-color: #11162B;
+			padding: 30px;
+			border-radius: 12px;
+			font-size: 18px;
+		}
+
+		/* èµ›äº‹æ™‹çº§æ ¼å¼é€‰é¡¹å¡ */
+		.bracket-tabs {
+			display: flex;
+			gap: 12px;
+			margin-bottom: 30px;
+			flex-wrap: wrap;
+		}
+
+		.bracket-tab {
+			padding: 10px 20px;
+			background-color: #0E1320;
+			border: 2px solid rgba(122, 184, 255, 0.2);
+			color: #7AB8FF;
+			border-radius: 8px;
+			cursor: pointer;
+			font-weight: 600;
+			transition: all 0.3s ease;
+		}
+
+		.bracket-tab:hover {
+			background-color: #162642;
+			border-color: #7AB8FF;
+		}
+
+		.bracket-tab.active {
+			background-color: #7AB8FF;
+			color: #0A0F1A;
+			border-color: #7AB8FF;
+		}
+
+		/* èµ›äº‹çº§åˆ«æ˜¾ç¤º */
+		.bracket-level {
+			display: none;
+		}
+
+		.bracket-level.active {
+			display: block;
+		}
+
+		/* èµ›äº‹ç­‰çº§æ ‡é¢˜ */
+		.level-title {
+			text-align: center;
+			color: #FFD27A;
+			font-size: 20px;
+			font-weight: 600;
+			margin-bottom: 24px;
+			padding-bottom: 12px;
+			border-bottom: 2px solid rgba(255, 210, 122, 0.3);
+		}
+
+		/* èµ›äº‹æ™‹çº§ç½‘æ ¼ */
+		.bracket-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+			gap: 16px;
+			margin-bottom: 30px;
+		}
+
+		/* æ¯”èµ›å¡ç‰‡ */
+		.match-card {
+			background-color: #0E1320;
+			border: 1px solid rgba(122, 184, 255, 0.2);
+			border-radius: 8px;
+			padding: 16px;
+			transition: all 0.3s ease;
+		}
+
+		.match-card:hover {
+			border-color: #7AB8FF;
+			box-shadow: 0 0 10px rgba(122, 184, 255, 0.3);
+		}
+
+		/* æ¯”èµ›ç¼–å· */
+		.match-number {
+			color: #FFD27A;
+			font-weight: 600;
+			font-size: 14px;
+			margin-bottom: 12px;
+			text-align: center;
+		}
+
+		/* æ°´å¹³å¸ƒå±€æ¯”èµ› */
+		.match-horizontal {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 10px;
+		}
+
+		/* é€‰æ‰‹ç›’å­ */
+		.player-box {
+			flex: 1;
+			background-color: #162642;
+			border: 1px solid rgba(122, 184, 255, 0.15);
+			border-radius: 6px;
+			padding: 12px;
+			text-align: center;
+			transition: all 0.3s ease;
+		}
+
+		.player-box.winner {
+			background-color: rgba(255, 210, 122, 0.15);
+			border-color: #FFD27A;
+			box-shadow: 0 0 8px rgba(255, 210, 122, 0.3);
+		}
+
+		.player-name {
+			font-weight: 600;
+			font-size: 14px;
+			color: #ffffff;
+			margin-bottom: 6px;
+		}
+
+		.player-score {
+			color: #7AB8FF;
+			font-weight: 600;
+			font-size: 12px;
+		}
+
+		/* VS åˆ†éš”ç¬¦ */
+		.vs-divider {
+			color: #7AB8FF;
+			font-weight: 600;
+			font-size: 12px;
+			flex-shrink: 0;
+			padding: 0 8px;
+			text-align: center;
+		}
+
+		/* èµ›äº‹æ€»ç»“ */
+		.bracket-summary {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+			gap: 16px;
+			padding: 20px;
+			background-color: #0E1320;
+			border: 1px solid rgba(122, 184, 255, 0.2);
+			border-radius: 8px;
+		}
+
+		.summary-item {
+			text-align: center;
+		}
+
+		.summary-label {
+			color: #7AB8FF;
+			font-size: 12px;
+			font-weight: 600;
+			margin-bottom: 8px;
+			display: block;
+		}
+
+		.summary-value {
+			color: #FFD27A;
+			font-size: 18px;
+			font-weight: 700;
+		}
+
+		footer {
+			background-color: #0A0F1A;
+			text-align: center;
+			padding: 30px 20px;
+			border-top: 1px solid #1E2233;
+			margin-top: 60px;
+		}
+
+		footer a {
+			color: #7AB8FF;
+			text-decoration: none;
+		}
+
+		footer a:hover {
+			text-decoration: underline;
+		}
+	</style>
+</head>
+<body>
+
+<header>
+	<div style="display: flex; align-items: center;">
+		<img src="./image/H2O_LOGO.png" alt="H2O斯诺克俱乐部LOGO" />
+		<h1>H2O Snooker</h1>
+	</div>
+	<nav>
+		<a href="login.html">首页</a>
+		<a href="events.html">赛事</a>
+		<a href="entertainment.html">娱乐玩法</a>
+		<a href="login.html#fees">收费 & 联系方式</a>
+	</nav>
+</header>
+
+<!-- èµ›äº‹é¡µé¢ -->
+<main id="events" class="container">
+	<h2>赛事信息</h2>
+
+	<!-- æ™‹çº§æ ¼å¼é€‰é¡¹å¡ -->
+	<div class="card">
+		<div class="bracket-tabs">
+			<button class="bracket-tab active" onclick="showBracket(event, '决赛')">决赛</button>
+			<button class="bracket-tab" onclick="showBracket(event, '半决赛4')">半决赛 4强</button>
+			<button class="bracket-tab" onclick="showBracket(event, '8')">8强</button>
+			<button class="bracket-tab" onclick="showBracket(event, '16')">16强</button>
+			<button class="bracket-tab" onclick="showBracket(event, '32')">32强</button>
+		</div>
+
+		<!-- 8强晋级格式 -->
+		<div class="bracket-level" id="bracket-8">
+			<div class="level-title">🏆 八强赛事 - 2025年11月</div>
+
+			<div class="bracket-grid">
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 1</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 2</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 3</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 4</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- èµ›äº‹æ€»ç»“ -->
+			<div class="bracket-summary">
+				<div class="summary-item">
+					<span class="summary-label">参赛人数</span>
+					<div class="summary-value">8</div>
+				</div>
+				<div class="summary-item">
+					<span class="summary-label">已完成比赛</span>
+					<div class="summary-value">4/4</div>
+				</div>
+				<div class="summary-item">
+					<span class="summary-label">进行中</span>
+					<div class="summary-value">0</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- 16强晋级格式 -->
+		<div class="bracket-level" id="bracket-16">
+			<div class="level-title">🏆 十六强赛事 - 2025年10月</div>
+
+			<div class="bracket-grid">
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 1</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 2</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 3</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 4</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 5</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 6</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 7</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 8</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- èµ›äº‹æ€»ç»“ -->
+			<div class="bracket-summary">
+				<div class="summary-item">
+					<span class="summary-label">参赛人数</span>
+					<div class="summary-value">16</div>
+				</div>
+				<div class="summary-item">
+					<span class="summary-label">已完成比赛</span>
+					<div class="summary-value">8/8</div>
+				</div>
+				<div class="summary-item">
+					<span class="summary-label">进行中</span>
+					<div class="summary-value">0</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- 32强晋级格式 -->
+		<div class="bracket-level" id="bracket-32">
+			<div class="level-title">🏆 三十二强赛事 - 2025年9月</div>
+
+			<div class="bracket-grid">
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 1</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 2</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 3</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 4</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 5</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 6</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 7</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 8</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 9</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 10</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 11</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 12</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 13</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 14</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 15</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">第一轮 - 对战 16</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- èµ›äº‹æ€»ç»“ -->
+			<div class="bracket-summary">
+				<div class="summary-item">
+					<span class="summary-label">参赛人数</span>
+					<div class="summary-value">32</div>
+				</div>
+				<div class="summary-item">
+					<span class="summary-label">已完成比赛</span>
+					<div class="summary-value">16/16</div>
+				</div>
+				<div class="summary-item">
+					<span class="summary-label">进行中</span>
+					<div class="summary-value">0</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- 半决赛4强 -->
+		<div class="bracket-level" id="bracket-半决赛4">
+			<div class="level-title">🏅 半决赛 4强 - 2025年12月</div>
+
+			<div class="bracket-grid">
+				<div class="match-card">
+					<div class="match-number">半决赛 - 对战 1</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="match-card">
+					<div class="match-number">半决赛 - 对战 2</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- èµ›äº‹æ€»ç»“ -->
+			<div class="bracket-summary">
+				<div class="summary-item">
+					<span class="summary-label">参赛人数</span>
+					<div class="summary-value">4</div>
+				</div>
+				<div class="summary-item">
+					<span class="summary-label">已完成比赛</span>
+					<div class="summary-value">2/2</div>
+				</div>
+				<div class="summary-item">
+					<span class="summary-label">进行中</span>
+					<div class="summary-value">0</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- 决赛 -->
+		<div class="bracket-level active" id="bracket-决赛">
+			<div class="level-title">🏆 决赛 - 2025年12月28日</div>
+
+			<div class="bracket-grid">
+				<div class="match-card">
+					<div class="match-number">🏆 最终冠军争夺战</div>
+					<div class="match-horizontal">
+						<div class="player-box winner">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+						<div class="vs-divider">VS</div>
+						<div class="player-box">
+							<div class="player-name">待定</div>
+							<div class="player-score">0:0</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- èµ›äº‹æ€»ç»“ -->
+			<div class="bracket-summary">
+				<div class="summary-item">
+					<span class="summary-label">参赛人数</span>
+					<div class="summary-value">2</div>
+				</div>
+				<div class="summary-item">
+					<span class="summary-label">已完成比赛</span>
+					<div class="summary-value">1/1</div>
+				</div>
+				<div class="summary-item">
+					<span class="summary-label">冠军</span>
+					<div class="summary-value">选手 1 🏅</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</main>
+
+<footer>
+	<p>© 2025 H2O Snooker Centre. All rights reserved.</p>
+	<div style="margin-top: 10px; font-size: 12px;">
+		<a href="privacy.html">隐私权政策</a>
+		 | 
+		<a href="terms.html">使用条款</a>
+	</div>
+</footer>
+
+<script>
+	// 晋级格式选项卡切换
+	function showBracket(event, level) {
+		// 隐藏所有晋级格式
+		const brackets = document.querySelectorAll('.bracket-level');
+		brackets.forEach(bracket => bracket.classList.remove('active'));
+
+		// 隐藏所有选项卡的激活状态
+		const tabs = document.querySelectorAll('.bracket-tab');
+		tabs.forEach(tab => tab.classList.remove('active'));
+
+		// 显示选中的晋级格式
+		const elementId = `bracket-${level}`;
+		const element = document.getElementById(elementId);
+		if (element) {
+			element.classList.add('active');
+		}
+
+		// 激活对应的选项卡
+		if (event && event.target) {
+			event.target.classList.add('active');
+		}
+	}
+</script>
+
+</body>
+</html>
+
+
+
+
+
